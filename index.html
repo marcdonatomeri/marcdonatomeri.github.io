@@ -705,6 +705,11 @@ const isSmall = () => matchMedia('(max-width: 820px)').matches;
 const small = isSmall();
 const fine = matchMedia('(pointer: fine)').matches;
 const fmt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+/* year of the degree from the visitor's date: the course changes every September
+   (sep 2024 → 1.º, sep 2025 → 2.º, sep 2026 → 3.º, sep 2027 → 4.º; it stays at 4.º after that) */
+const courseFor = d => Math.min(4, Math.max(1, d.getFullYear() - 2024 + (d.getMonth() >= 8 ? 1 : 0)));
+const COURSE = courseFor(new Date());
+const COURSE_WORD = ['primero', 'segundo', 'tercero', 'cuarto'][COURSE - 1];
 const PALETTE = ['#D4FF3A', '#7AA7FF', '#F2C14E', '#FF6B3D', '#EDEAE2'];
 const CLUSTER_NAMES = ['Bailables y alegres', 'Acústicas y tranquilas', 'Instrumentales', 'Habladas y rap', 'Enérgicas y en directo'];
 const THEMES = {
@@ -852,6 +857,8 @@ $('.legend .clusters').innerHTML = sizes.map((s, i) => `<li><i style="background
    ABOUT · words that focus + attention lines
    ========================================================= */
 const aboutP = $('#about-text');
+aboutP.textContent = aboutP.textContent.replace(/^Estudio \S+ del Grado/, `Estudio ${COURSE_WORD} del Grado`);
+$('.stat .n[data-suffix=".º"]').dataset.count = COURSE;
 const split = new SplitText(aboutP, { type: 'words', wordsClass: 'w' });
 const GROUPS = [
   ['datos', 'análisis', 'visualización', 'resultados', 'obtención', 'ciencia'],
@@ -1026,7 +1033,7 @@ function run(raw, ctx) {
   switch (c) {
     case '': return [];
     case 'help': case 'ayuda': return ['órdenes disponibles:', '  whoami        quién soy', '  sobre         mi perfil', '  proyectos     lista de proyectos', '  skills        tabla de habilidades', '  certs         certificaciones', '  contacto      email y enlaces', '  ir <sección>  inicio, sobre, proyectos, habilidades, trayectoria, contacto', '  abrir <x>     github, linkedin o un proyecto', '  kmeans        explica la nube del principio', '  clear         limpia la pantalla', ctx === 'overlay' ? '  exit          cierra la terminal' : '', '', 'pista: hay una orden con sudo.'];
-    case 'whoami': return ['Marc Donato Merí', 'Estudiante de 3.º del Grado en Ciencia de Datos (UPV) · Valencia', 'Intereses: machine learning, IA generativa y visualización de datos'];
+    case 'whoami': return ['Marc Donato Merí', `Estudiante de ${COURSE}.º del Grado en Ciencia de Datos (UPV) · Valencia`, 'Intereses: machine learning, IA generativa y visualización de datos'];
     case 'sobre': case 'about': return [aboutP.textContent.replace(/\s+/g, ' ').trim()];
     case 'proyectos': case 'projects': case 'ls': return PROJECTS.map(p => ({ html: `  ${esc(p[0].padEnd(11))} ${esc(p[1])}  ${link(p[2], '[github]')}` }));
     case 'skills': case 'habilidades': return ['&gt; SELECT herramienta, tipo, usada_en FROM skills;'.replace('&gt;', '>'), ...skillsTable()];
