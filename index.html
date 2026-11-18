@@ -77,6 +77,8 @@ html.has-cursor.in-hero #guide-x,html.has-cursor.in-hero #guide-y{display:block}
 #cursor .cross{position:absolute;left:-11px;top:-11px;width:22px;height:22px;transition:transform .35s var(--ease)}
 #cursor .cross::before,#cursor .cross::after{content:"";position:absolute;background:var(--cur)}
 html.amber #cursor,html.amber #guide-x,html.amber #guide-y{--cur:#FFB000}
+/* over a project card the cursor sits on the bright x-ray circle: draw it dark */
+html #cursor.on-xray,html.amber #cursor.on-xray{--cur:#0B0D0C}
 #cursor .cross::before{left:10px;top:0;width:2px;height:22px}
 #cursor .cross::after{top:10px;left:0;height:2px;width:22px}
 #cursor .ring{position:absolute;left:-22px;top:-22px;width:44px;height:44px;border:1px solid var(--cur);border-radius:50%;opacity:0;transform:scale(.4);transition:opacity .3s,transform .4s var(--ease)}
@@ -205,7 +207,8 @@ h2{font:600 clamp(44px,7.4vw,120px)/.9 var(--f-display);letter-spacing:-.025em}
 .card-info .big{font:600 clamp(40px,4vw,68px)/1 var(--f-display);color:var(--signal);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .card-info .big small{display:block;font:400 12px/1.4 var(--f-mono);color:var(--muted);letter-spacing:0;margin-top:6px}
 .card-info .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
-.card-info .gh{font:500 14px var(--f-mono);color:var(--bone);text-decoration:none;border-bottom:1px solid var(--signal);align-self:flex-start;padding-bottom:3px}
+.card-info .gh{position:relative;z-index:6;font:500 14px var(--f-mono);color:var(--bone);text-decoration:none;align-self:flex-start;padding:9px 14px;border-radius:999px;background:#0B0D0C;border:1px solid var(--signal);transition:background .25s,color .25s}
+.card-info .gh:hover{color:var(--signal);box-shadow:0 0 0 2px var(--ink)}
 .xray{position:absolute;inset:0;z-index:4;background:var(--signal);color:var(--ink);padding:clamp(22px,2.6vw,40px);font:400 13px/1.65 var(--f-mono);white-space:pre-wrap;clip-path:circle(var(--r,0px) at var(--mx,50%) var(--my,50%));pointer-events:none;overflow:hidden}
 .xray .xcap{display:block;margin-bottom:14px;opacity:.6}
 .glare{position:absolute;inset:0;z-index:5;pointer-events:none;background:radial-gradient(500px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.07),transparent 45%);opacity:0;transition:opacity .4s}
@@ -836,7 +839,11 @@ if (fine && !reduced) {
     cx(e.clientX); cy(e.clientY); gx(e.clientY); gy(e.clientX);
     coord.textContent = `x ${(e.clientX / innerWidth).toFixed(2)}  y ${(1 - e.clientY / innerHeight).toFixed(2)}`;
   }, { passive: true });
-  document.addEventListener('pointerover', e => { cur.classList.toggle('link', !!e.target.closest('a,button,input,.card,.ms button')); });
+  document.addEventListener('pointerover', e => {
+    cur.classList.toggle('link', !!e.target.closest('a,button,input,.card,.ms button'));
+    // dark cursor on the lime x-ray circle, back to normal over the (dark) GitHub button
+    cur.classList.toggle('on-xray', !!e.target.closest('.card') && !e.target.closest('.gh') && !small);
+  });
   root.addEventListener('mouseleave', () => gsap.set(cur, { opacity: 0 }));
   root.addEventListener('mouseenter', () => gsap.set(cur, { opacity: 1 }));
 }
